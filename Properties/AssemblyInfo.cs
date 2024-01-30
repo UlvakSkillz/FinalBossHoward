@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using MelonLoader;
 using FinalBossHoward; // The namespace of your mod class
 // ...
-[assembly: MelonInfo(typeof(main), "Final Boss Howard", "1.0.0", "UlvakSkillz")]
+[assembly: MelonInfo(typeof(main), "Final Boss Howard", "1.1.0", "UlvakSkillz")]
 [assembly: MelonGame("Buckethead Entertainment", "RUMBLE")]
 
 // General Information about an assembly is controlled through the following

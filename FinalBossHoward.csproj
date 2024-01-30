@@ -45,6 +45,7 @@
     <Reference Include="MelonLoader">
       <HintPath>F:\SteamLibrary\steamapps\common\RUMBLE\MelonLoader\MelonLoader.dll</HintPath>
     </Reference>
+    <Reference Include="PhotonUnityNetworking, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="RUMBLE.AssetStore.ModernUIPack">
       <HintPath>F:\SteamLibrary\steamapps\common\RUMBLE\MelonLoader\Managed\RUMBLE.AssetStore.ModernUIPack.dll</HintPath>
     </Reference>

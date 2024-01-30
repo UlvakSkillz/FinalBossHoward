@@ -22,7 +22,6 @@ C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\Unity.XR.O
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\BucketheadEntertainment.Plugins.dll
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\UnityEngine.PhysicsModule.dll
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\PhotonRealtime.dll
-C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\PhotonUnityNetworking.dll
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\Photon3Unity3D.dll
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\PlayFab.dll
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\PhotonChat.dll
@@ -122,3 +121,4 @@ C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\obj\Debug\FinalBossH
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\obj\Debug\FinalBossHoward.dll
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\obj\Debug\FinalBossHoward.pdb
 C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\bin\Debug\RUMBLE.AssetStore.ModernUIPack.dll
+C:\Users\austi\source\repos\FinalBossHoward\FinalBossHoward\obj\Debug\FinalBossHoward.csproj.AssemblyReference.cache
