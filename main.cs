@@ -74,11 +74,6 @@ namespace FinalBossHoward
             howard.LogicLevels[2].howardHeadlightColor = new Color(0.414f, 0, 1, 1);
             howard.LogicLevels[2].howardIdleLevelColor = new Color(0.414f, 0, 1, 1);
             howard.LogicLevels[2].howardLevelColor = new Color(0.414f, 0, 1, 1);
-            //HowardLogic.SequenceSet customSequence = howard.LogicLevels[2].SequenceSets[4];
-            //HowardAttackBehaviour tempAttackBehaviour = customSequence.Sequence.BehaviourTimings[0].Behaviour;
-            //HowardBehaviour tempBehaviour = customSequence.Sequence.BehaviourTimings[0].Behaviour;
-            //HowardBehaviour howardattackBehaviour = howard.LogicLevels[2].SequenceSets[4].Sequence.BehaviourTimings[1].Behaviour;
-            //Howard.currentActiveHoward.LogicLevels[2].SequenceSets[4].Sequence.BehaviourTimings[1].Behaviour;
         }
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
