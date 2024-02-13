@@ -50,6 +50,9 @@ namespace FinalBossHoward
         private bool sceneChanged = false;
         public bool howardActive = false;
         private PoolManager poolManager;
+        private StackManager stackManager;
+        private HowardAttackBehaviour[] howardAttackBehaviour;
+        private HowardLogic.SequenceSet[] newSequenceSet;
         private GameObject discPool, ballPool, pillarPool, cubePool, wallPool, smallRockPool, largeRockPool;
         private DateTime[] discPoolTimer, ballPoolTimer, pillarPoolTimer, cubePoolTimer, wallPoolTimer, smallRockPoolTimer, largeRockPoolTimer;
         private bool[] discPoolTimerActive;
@@ -78,13 +81,17 @@ namespace FinalBossHoward
                     {
                         //setup
                         poolManager = GameObject.Find("Game Instance/Pre-Initializable/PoolManager").GetComponent<PoolManager>();
+                        stackManager = GameObject.Find("Game Instance/Initializable/StackManager").GetComponent<StackManager>();
                         SetupPoolArrays();
                         BuffHowardLevel2();
                         sceneChanged = false;
+                        howard.SetCurrentLogicLevel(2);//////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        howard.SetHowardLogicActive(true);///////////////////////////////////////////////////////////////////////////////////////////////////////
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    //MelonLogger.Error(e);
                     return;
                 }
             }
@@ -101,7 +108,7 @@ namespace FinalBossHoward
                 {
                     //update structure timers
                     ClearRails();
-                    checkStructuresTimer = DateTime.Now.AddSeconds(1);
+                    checkStructuresTimer = DateTime.Now.AddSeconds(0.75);
                 }
             }
         }
@@ -187,143 +194,35 @@ namespace FinalBossHoward
         //checks if structure timers to destroy are done
         private void CheckTimersIfDone()
         {
-            //for each disc timer
-            for (int i = 0; i < discPoolTimer.Length; i++)
+            CheckPoolTimers(discPool, discPoolTimer, discPoolTimerActive);
+            CheckPoolTimers(pillarPool, pillarPoolTimer, pillarPoolTimerActive);
+            CheckPoolTimers(ballPool, ballPoolTimer, ballPoolTimerActive);
+            CheckPoolTimers(cubePool, cubePoolTimer, cubePoolTimerActive);
+            CheckPoolTimers(wallPool, wallPoolTimer, wallPoolTimerActive);
+            CheckPoolTimers(smallRockPool, smallRockPoolTimer, smallRockPoolTimerActive);
+            CheckPoolTimers(largeRockPool, largeRockPoolTimer, largeRockPoolTimerActive);
+        }
+
+        //checks the given pools timers
+        private void CheckPoolTimers(GameObject pool, DateTime[] poolTimer, bool[] poolTimerActive)
+        {
+            //for each pool timer
+            for (int i = 0; i < poolTimer.Length; i++)
             {
                 //if timer is active
-                if (discPoolTimerActive[i])
+                if (poolTimerActive[i])
                 {
                     //if timer elapsed
-                    if (discPoolTimer[i] <= DateTime.Now)
+                    if (poolTimer[i] <= DateTime.Now)
                     {
                         //if structure active and at rest still
-                        if ((discPool.transform.GetChild(i).gameObject.active) && (discPool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
+                        if ((pool.transform.GetChild(i).gameObject.active) && (pool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
                         {
                             //destroy structure
-                            discPool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
+                            pool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
                         }
                         //deactivate timer
-                        discPoolTimerActive[i] = false;
-                    }
-                }
-            }
-            //for each pillar timer
-            for (int i = 0; i < pillarPoolTimer.Length; i++)
-            {
-                //if timer is active
-                if (pillarPoolTimerActive[i])
-                {
-                    //if timer elapsed
-                    if (pillarPoolTimer[i] <= DateTime.Now)
-                    {
-                        //if structure active and at rest still
-                        if ((pillarPool.transform.GetChild(i).gameObject.active) && (pillarPool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
-                        {
-                            //destroy structure
-                            pillarPool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
-                        }
-                        //deactivate timer
-                        pillarPoolTimerActive[i] = false;
-                    }
-                }
-            }
-            //for each ball timer
-            for (int i = 0; i < ballPoolTimer.Length; i++)
-            {
-                //if timer is active
-                if (ballPoolTimerActive[i])
-                {
-                    //if timer elapsed
-                    if (ballPoolTimer[i] <= DateTime.Now)
-                    {
-                        //if structure active and at rest still
-                        if ((ballPool.transform.GetChild(i).gameObject.active) && (ballPool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
-                        {
-                            //destroy structure
-                            ballPool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
-                        }
-                        //deactivate timer
-                        ballPoolTimerActive[i] = false;
-                    }
-                }
-            }
-            //for each cube timer
-            for (int i = 0; i < cubePoolTimer.Length; i++)
-            {
-                //if timer is active
-                if (cubePoolTimerActive[i])
-                {
-                    //if timer elapsed
-                    if (cubePoolTimer[i] <= DateTime.Now)
-                    {
-                        //if structure active and at rest still
-                        if ((cubePool.transform.GetChild(i).gameObject.active) && (cubePool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
-                        {
-                            //destroy structure
-                            cubePool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
-                        }
-                        //deactivate timer
-                        cubePoolTimerActive[i] = false;
-                    }
-                }
-            }
-            //for each wall timer
-            for (int i = 0; i < wallPoolTimer.Length; i++)
-            {
-                //if timer is active
-                if (wallPoolTimerActive[i])
-                {
-                    //if timer elapsed
-                    if (wallPoolTimer[i] <= DateTime.Now)
-                    {
-                        //if structure active and at rest still
-                        if ((wallPool.transform.GetChild(i).gameObject.active) && (wallPool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
-                        {
-                            //destroy structure
-                            wallPool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
-                        }
-                        //deactivate timer
-                        wallPoolTimerActive[i] = false;
-                    }
-                }
-            }
-            //for each small rock timer
-            for (int i = 0; i < smallRockPoolTimer.Length; i++)
-            {
-                //if timer is active
-                if (smallRockPoolTimerActive[i])
-                {
-                    //if timer elapsed
-                    if (smallRockPoolTimer[i] <= DateTime.Now)
-                    {
-                        //if structure active and at rest still
-                        if ((smallRockPool.transform.GetChild(i).gameObject.active) && (smallRockPool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
-                        {
-                            //destroy structure
-                            smallRockPool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
-                        }
-                        //deactivate timer
-                        smallRockPoolTimerActive[i] = false;
-                    }
-                }
-            }
-            //for each large rock timer
-            for (int i = 0; i < largeRockPoolTimer.Length; i++)
-            {
-                //if timer is active
-                if (largeRockPoolTimerActive[i])
-                {
-                    //if timer elapsed
-                    if (largeRockPoolTimer[i] <= DateTime.Now)
-                    {
-                        //if structure active and at rest still
-                        if ((largeRockPool.transform.GetChild(i).gameObject.active) && (largeRockPool.transform.GetChild(i).GetComponent<Structure>().CurrentSpeed == 0))
-                        {
-                            //destroy structure
-                            largeRockPool.transform.GetChild(i).GetComponent<Structure>().Kill(new Vector3(0, 0, 0), true, true, true);
-                        }
-                        //deactivate timer
-                        largeRockPoolTimerActive[i] = false;
+                        poolTimerActive[i] = false;
                     }
                 }
             }
@@ -332,138 +231,46 @@ namespace FinalBossHoward
         //Increases the Rail Structure Destroying Arrays
         private void IncreaseArraySizes(string poolName)
         {
-            DateTime[] tempDateTimeArray;
-            bool[] tempBoolArray;
             //find correct pool and increase array
             switch (poolName)
             {
                 case "Disc":
-                    tempDateTimeArray = new DateTime[discPool.transform.childCount];
-                    tempBoolArray = new bool[discPool.transform.childCount];
-                    for (int i = 0; i < discPoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = discPoolTimer[i];
-                        tempBoolArray[i] = discPoolTimerActive[i];
-                    }
-                    try
-                    {
-                        discPoolTimer = tempDateTimeArray;
-                        discPoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(discPool, discPoolTimer, discPoolTimerActive);
                     break;
                 case "Pillar":
-                    tempDateTimeArray = new DateTime[pillarPool.transform.childCount];
-                    tempBoolArray = new bool[pillarPool.transform.childCount];
-                    for (int i = 0; i < pillarPoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = pillarPoolTimer[i];
-                        tempBoolArray[i] = pillarPoolTimerActive[i];
-                    }
-                    try
-                    {
-                        pillarPoolTimer = tempDateTimeArray;
-                        pillarPoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(pillarPool, pillarPoolTimer, pillarPoolTimerActive);
                     break;
                 case "Ball":
-                    tempDateTimeArray = new DateTime[ballPool.transform.childCount];
-                    tempBoolArray = new bool[ballPool.transform.childCount];
-                    for (int i = 0; i < ballPoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = ballPoolTimer[i];
-                        tempBoolArray[i] = ballPoolTimerActive[i];
-                    }
-                    try
-                    {
-                        ballPoolTimer = tempDateTimeArray;
-                        ballPoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(ballPool, ballPoolTimer, ballPoolTimerActive);
                     break;
                 case "Cube":
-                    tempDateTimeArray = new DateTime[cubePool.transform.childCount];
-                    tempBoolArray = new bool[cubePool.transform.childCount];
-                    for (int i = 0; i < cubePoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = cubePoolTimer[i];
-                        tempBoolArray[i] = cubePoolTimerActive[i];
-                    }
-                    try
-                    {
-                        cubePoolTimer = tempDateTimeArray;
-                        cubePoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(cubePool, cubePoolTimer, cubePoolTimerActive);
                     break;
                 case "Wall":
-                    tempDateTimeArray = new DateTime[wallPool.transform.childCount];
-                    tempBoolArray = new bool[wallPool.transform.childCount];
-                    for (int i = 0; i < wallPoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = wallPoolTimer[i];
-                        tempBoolArray[i] = wallPoolTimerActive[i];
-                    }
-                    try
-                    {
-                        wallPoolTimer = tempDateTimeArray;
-                        wallPoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(wallPool, wallPoolTimer, wallPoolTimerActive);
                     break;
                 case "SmallRock":
-                    tempDateTimeArray = new DateTime[smallRockPool.transform.childCount];
-                    tempBoolArray = new bool[smallRockPool.transform.childCount];
-                    for (int i = 0; i < smallRockPoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = smallRockPoolTimer[i];
-                        tempBoolArray[i] = smallRockPoolTimerActive[i];
-                    }
-                    try
-                    {
-                        smallRockPoolTimer = tempDateTimeArray;
-                        smallRockPoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(smallRockPool, smallRockPoolTimer, smallRockPoolTimerActive);
                     break;
                 case "LargeRock":
-                    tempDateTimeArray = new DateTime[largeRockPool.transform.childCount];
-                    tempBoolArray = new bool[largeRockPool.transform.childCount];
-                    for (int i = 0; i < largeRockPoolTimer.Length; i++)
-                    {
-                        tempDateTimeArray[i] = largeRockPoolTimer[i];
-                        tempBoolArray[i] = largeRockPoolTimerActive[i];
-                    }
-                    try
-                    {
-                        largeRockPoolTimer = tempDateTimeArray;
-                        largeRockPoolTimerActive = tempBoolArray;
-                    }
-                    catch (Exception e)
-                    {
-                        MelonLogger.Msg(e);
-                    }
+                    IncreasePoolArray(largeRockPool, largeRockPoolTimer, largeRockPoolTimerActive);
                     break;
             }
+        }
+
+        private void IncreasePoolArray(GameObject pool, DateTime[] poolTimer, bool[] poolTimerActive)
+        {
+            DateTime[] tempDateTimeArray;
+            bool[] tempBoolArray;
+            tempDateTimeArray = new DateTime[pool.transform.childCount];
+            tempBoolArray = new bool[pool.transform.childCount];
+            for (int i = 0; i < poolTimer.Length; i++)
+            {
+                tempDateTimeArray[i] = poolTimer[i];
+                tempBoolArray[i] = poolTimerActive[i];
+            }
+            poolTimer = tempDateTimeArray;
+            poolTimerActive = tempBoolArray;
         }
 
         //checks timers to see if objects near rails need to be destroyed
@@ -484,49 +291,49 @@ namespace FinalBossHoward
                             case "Disc":
                                 if (!discPoolTimerActive[i])
                                 {
-                                    discPoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    discPoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     discPoolTimerActive[i] = true;
                                 }
                                 break;
                             case "Pillar":
                                 if (!pillarPoolTimerActive[i])
                                 {
-                                    pillarPoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    pillarPoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     pillarPoolTimerActive[i] = true;
                                 }
                                 break;
                             case "Ball":
                                 if (!ballPoolTimerActive[i])
                                 {
-                                    ballPoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    ballPoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     ballPoolTimerActive[i] = true;
                                 }
                                 break;
                             case "Cube":
                                 if (!cubePoolTimerActive[i])
                                 {
-                                    cubePoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    cubePoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     cubePoolTimerActive[i] = true;
                                 }
                                 break;
                             case "Wall":
                                 if (!wallPoolTimerActive[i])
                                 {
-                                    wallPoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    wallPoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     wallPoolTimerActive[i] = true;
                                 }
                                 break;
                             case "SmallRock":
                                 if (!smallRockPoolTimerActive[i])
                                 {
-                                    smallRockPoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    smallRockPoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     smallRockPoolTimerActive[i] = true;
                                 }
                                 break;
                             case "LargeRock":
                                 if (!largeRockPoolTimerActive[i])
                                 {
-                                    largeRockPoolTimer[i] = DateTime.Now.AddSeconds(1);
+                                    largeRockPoolTimer[i] = DateTime.Now.AddSeconds(0.75);
                                     largeRockPoolTimerActive[i] = true;
                                 }
                                 break;
@@ -534,6 +341,110 @@ namespace FinalBossHoward
                     }
                 }
             }
+        }
+
+        
+        private void SetupNewMoveset()
+        {
+            newSequenceSet = new HowardLogic.SequenceSet[6];
+            newSequenceSet[0] = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[3]; // dodge
+            newSequenceSet[1] = new HowardLogic.SequenceSet();
+            newSequenceSet[2] = new HowardLogic.SequenceSet();
+            newSequenceSet[3] = new HowardLogic.SequenceSet();
+            newSequenceSet[4] = new HowardLogic.SequenceSet();
+            newSequenceSet[5] = new HowardLogic.SequenceSet();
+            SetupMoveset(newSequenceSet[1], "DiscStraight", 0, 100, 50, 25);//disc
+            SetupMoveset(newSequenceSet[2], "BallUppercutStraight", 0, Vector2.positiveInfinity.y, 50, 25);//ball
+            SetupMoveset(newSequenceSet[3], "PillarPillarStraightStraight", 0, 6, 50, 25);//pillar
+            SetupMoveset(newSequenceSet[4], "CubeStraightUppercut", 2, Vector2.positiveInfinity.y, 50, 25);//cube
+            SetupMoveset(newSequenceSet[5], "WallStraightUppercutKick", 5, Vector2.positiveInfinity.y, 50, 25);//wall
+        }
+
+        private void SetupMoveset(HowardLogic.SequenceSet sequenceSet, string name, float minRange, float maxRange, float weight, float weightDecrementationWhenSelected)
+        {
+            sequenceSet.currentWeightDecrementation = 0;
+            sequenceSet.RequiredMinMaxRange = new Vector2(minRange, maxRange);
+            sequenceSet.Sequence = new HowardSequence();
+            sequenceSet.Sequence.name = name;
+            sequenceSet.Sequence.BehaviourTimings = new HowardSequence.HowardBehaviourTiming[1];
+            sequenceSet.Sequence.BehaviourTimings[0] = new HowardSequence.HowardBehaviourTiming();
+            sequenceSet.Sequence.BehaviourTimings[0].Behaviour = new HowardAttackBehaviour();
+            sequenceSet.Sequence.BehaviourTimings[0].PreActivationWaitTime = 0;
+            sequenceSet.Sequence.BehaviourTimings[0].PostActivationWaitTime = 0;
+            sequenceSet.Weight = weight;
+            sequenceSet.WeightDecrementationWhenSelected = weightDecrementationWhenSelected;
+        }
+
+        private void CreateNewMoveset()
+        {
+            howardAttackBehaviour = new HowardAttackBehaviour[6];
+            howardAttackBehaviour[0] = new HowardAttackBehaviour();
+            howardAttackBehaviour[1] = new HowardAttackBehaviour();
+            howardAttackBehaviour[2] = new HowardAttackBehaviour();
+            howardAttackBehaviour[3] = new HowardAttackBehaviour();
+            howardAttackBehaviour[4] = new HowardAttackBehaviour();
+            howardAttackBehaviour[5] = new HowardAttackBehaviour();
+            for (int i = 1; i < newSequenceSet.Length; i++)
+            {
+                howardAttackBehaviour[i - 1] = newSequenceSet[i].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>();
+            }
+            //Disc Straight
+            howardAttackBehaviour[1].timedStacks = new HowardAttackBehaviour.TimedStack[2];
+            for(int i = 0; i < howardAttackBehaviour[1].timedStacks.Length; i++)
+            {
+                howardAttackBehaviour[1].timedStacks[i] = new HowardAttackBehaviour.TimedStack();
+            }
+            SetStack(howardAttackBehaviour[1].timedStacks[0], 0, "SpawnStructure", true, 0, 0, 0.1f, stackManager.allStacks[0]);
+            SetStack(howardAttackBehaviour[1].timedStacks[1], 0, "Straight", true, 0.3f, 0, 0.3f, stackManager.allStacks[25]);
+            //Ball Uppercut Straight
+            howardAttackBehaviour[2].timedStacks = new HowardAttackBehaviour.TimedStack[3];
+            for (int i = 0; i < howardAttackBehaviour[2].timedStacks.Length; i++)
+            {
+                howardAttackBehaviour[2].timedStacks[i] = new HowardAttackBehaviour.TimedStack();
+            }
+            SetStack(howardAttackBehaviour[2].timedStacks[0], 0, "SpawnStructure", false, 0, 0, 0.8f, stackManager.allStacks[20]);
+            SetStack(howardAttackBehaviour[2].timedStacks[1], 0, "Straight", true, 0.1f, 0, 0.1f, stackManager.allStacks[26]);
+            SetStack(howardAttackBehaviour[2].timedStacks[2], 0, "Straight", true, 0.3f, 0, 0.3f, stackManager.allStacks[25]);
+            //Pillar Pillar Straight Straight
+            howardAttackBehaviour[3].timedStacks = new HowardAttackBehaviour.TimedStack[4];
+            for (int i = 0; i < howardAttackBehaviour[3].timedStacks.Length; i++)
+            {
+                howardAttackBehaviour[3].timedStacks[i] = new HowardAttackBehaviour.TimedStack();
+            }
+            SetStack(howardAttackBehaviour[3].timedStacks[0], 0, "SpawnStructure", false, 0, 0, 0.4f, stackManager.allStacks[20]);
+            SetStack(howardAttackBehaviour[3].timedStacks[1], 0, "SpawnStructure", false, 0, 0, 0.2f, stackManager.allStacks[20]);
+            SetStack(howardAttackBehaviour[3].timedStacks[2], 0, "Straight", true, 0.3f, 0, 0.3f, stackManager.allStacks[25]);
+            SetStack(howardAttackBehaviour[3].timedStacks[3], 0, "Straight", true, 0.3f, 0, 0.3f, stackManager.allStacks[25]);
+            //Cube Straight Uppercut
+            howardAttackBehaviour[4].timedStacks = new HowardAttackBehaviour.TimedStack[3];
+            for (int i = 0; i < howardAttackBehaviour[4].timedStacks.Length; i++)
+            {
+                howardAttackBehaviour[4].timedStacks[i] = new HowardAttackBehaviour.TimedStack();
+            }
+            SetStack(howardAttackBehaviour[4].timedStacks[0], 0, "SpawnStructure", false, 0, 0, 0.4f, stackManager.allStacks[21]);
+            SetStack(howardAttackBehaviour[4].timedStacks[1], 0, "Straight", true, 0.1f, 0, 0.1f, stackManager.allStacks[25]);
+            SetStack(howardAttackBehaviour[4].timedStacks[2], 0, "Straight", true, 0.3f, 0, 0.3f, stackManager.allStacks[26]);
+            //Wall Straight Uppercut Kick
+            howardAttackBehaviour[5].timedStacks = new HowardAttackBehaviour.TimedStack[4];
+            for (int i = 0; i < howardAttackBehaviour[5].timedStacks.Length; i++)
+            {
+                howardAttackBehaviour[5].timedStacks[i] = new HowardAttackBehaviour.TimedStack();
+            }
+            SetStack(howardAttackBehaviour[5].timedStacks[0], 0, "SpawnStructure", false, 0, 0, 0.4f, stackManager.allStacks[23]);
+            SetStack(howardAttackBehaviour[5].timedStacks[1], 0, "Straight", true, 0.1f, 0, 0.1f, stackManager.allStacks[25]);
+            SetStack(howardAttackBehaviour[5].timedStacks[2], 0, "Straight", true, 0.1f, 0, 0.1f, stackManager.allStacks[26]);
+            SetStack(howardAttackBehaviour[5].timedStacks[3], 0, "Straight", true, 0.3f, 0, 0.3f, stackManager.allStacks[8]);
+        }
+
+        private void SetStack(HowardAttackBehaviour.TimedStack timedStack, float animationTriggerDelay, string animationTriggerName, bool isPersistentStack, float persistentStackWaitTime, float preWaitTime, float postWaitTime, Stack stack)
+        {
+            timedStack.AnimationTriggerDelay = animationTriggerDelay;
+            timedStack.AnimationTriggerName = animationTriggerName;
+            timedStack.IsPersistentStack = isPersistentStack;
+            timedStack.PersistentStackWaitTime = persistentStackWaitTime;
+            timedStack.PreWaitTime = preWaitTime;
+            timedStack.PostWaitTime = postWaitTime;
+            timedStack.Stack = stack;
         }
 
         //checks if structure is near the rails
@@ -579,132 +490,14 @@ namespace FinalBossHoward
             howard.LogicLevels[2].howardHeadlightColor = new Color(0.414f, 0, 1, 1);
             howard.LogicLevels[2].howardIdleLevelColor = new Color(0.414f, 0, 1, 1);
             howard.LogicLevels[2].howardLevelColor = new Color(0.414f, 0, 1, 1);
-            //buff moves
-            //grab old move sets
-            HowardMoveBehaviour howardMoveBehaviour = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[3].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardMoveBehaviour>(); //Passive Movement
-            HowardAttackBehaviour howardAttackBehaviour1 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[0].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Ball Straight
-            HowardAttackBehaviour howardAttackBehaviour2 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[1].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Ball Uppercut
-            HowardAttackBehaviour howardAttackBehaviour3 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[2].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Cube Kick Straight
-            HowardAttackBehaviour howardAttackBehaviour4 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[4].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Wall Straight Kick
-            HowardAttackBehaviour howardAttackBehaviour5 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[5].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Disc
-            HowardAttackBehaviour howardAttackBehaviour6 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[6].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Pillar Kick Straight
-            //create new movesets
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets.Add(new HowardLogic.SequenceSet());
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[7].Sequence = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[6].Sequence;
-            HowardAttackBehaviour howardAttackBehaviour7 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[7].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Pillar Pillar Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets.Add(new HowardLogic.SequenceSet());
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[8].Sequence = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[0].Sequence;
-            HowardAttackBehaviour howardAttackBehaviour8 = Howard.currentActiveHoward.LogicLevels[2].SequenceSets[8].Sequence.BehaviourTimings[0].Behaviour.Cast<HowardAttackBehaviour>(); //Ball Ground Straight
-            //Store Howards Moves
-            HowardAttackBehaviour.TimedStack[] howardsMoves = new HowardAttackBehaviour.TimedStack[8];
-            howardsMoves[0] = howardAttackBehaviour5.timedStacks[0]; //Disc
-            howardsMoves[1] = howardAttackBehaviour6.timedStacks[0]; //Pillar
-            howardsMoves[2] = howardAttackBehaviour1.timedStacks[0]; //Ball
-            howardsMoves[3] = howardAttackBehaviour3.timedStacks[0]; //Cube
-            howardsMoves[4] = howardAttackBehaviour4.timedStacks[0]; //Wall
-            howardsMoves[5] = howardAttackBehaviour1.timedStacks[1]; //Straight
-            howardsMoves[6] = howardAttackBehaviour2.timedStacks[1]; //Uppercut
-            howardsMoves[7] = howardAttackBehaviour3.timedStacks[2]; //Kick
-            //set passive move speed
-            howardMoveBehaviour.AnglePerSecond = 30;
-            //start modifing poses
-            //0: Ball Straight (modified timings)
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[0].RequiredMinMaxRange = new Vector2(7, 10);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[0].Weight = 50;
-            howardAttackBehaviour1.timedStacks[0] = howardsMoves[2];
-            howardAttackBehaviour1.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour1.timedStacks[0].PostWaitTime = 0.4f;
-            howardAttackBehaviour1.timedStacks[1] = howardsMoves[5];
-            howardAttackBehaviour1.timedStacks[1].PreWaitTime = 0.1f;
-            howardAttackBehaviour1.timedStacks[1].PostWaitTime = 0.3f;
-            //1: Ball Uppercut (modified timings)
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[1].RequiredMinMaxRange = new Vector2(5, 7);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[1].Weight = 50;
-            howardAttackBehaviour2.timedStacks[0] = howardsMoves[2];
-            howardAttackBehaviour2.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour2.timedStacks[0].PostWaitTime = 0.4f;
-            howardAttackBehaviour2.timedStacks[1] = howardsMoves[6];
-            howardAttackBehaviour2.timedStacks[1].PreWaitTime = 0.1f;
-            howardAttackBehaviour2.timedStacks[1].PostWaitTime = 0.3f;
-            //2: Cube Uppercut Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[2].RequiredMinMaxRange = new Vector2(0, 10);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[2].Weight = 50;
-            howardAttackBehaviour3.timedStacks[0] = howardsMoves[3];
-            howardAttackBehaviour3.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour3.timedStacks[0].PostWaitTime = 0.75f;
-            howardAttackBehaviour3.timedStacks[1] = howardsMoves[6];
-            howardAttackBehaviour3.timedStacks[1].PreWaitTime = 0.1f;
-            howardAttackBehaviour3.timedStacks[1].PostWaitTime = 0.5f;
-            howardAttackBehaviour3.timedStacks[2] = howardsMoves[5];
-            howardAttackBehaviour3.timedStacks[2].PreWaitTime = 0.1f;
-            howardAttackBehaviour3.timedStacks[2].PostWaitTime = 0.3f;
-            //4: Wall Cube Straight Uppercut Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[4].RequiredMinMaxRange = new Vector2(1, 8);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[4].Weight = 50;
-            howardAttackBehaviour4.timedStacks = new HowardAttackBehaviour.TimedStack[5];
-            howardAttackBehaviour4.timedStacks[0] = howardsMoves[4];
-            howardAttackBehaviour4.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[0].PostWaitTime = 0.5f;
-            howardAttackBehaviour4.timedStacks[1] = howardsMoves[3];
-            howardAttackBehaviour4.timedStacks[1].PreWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[1].PostWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[2] = howardsMoves[5];
-            howardAttackBehaviour4.timedStacks[2].PreWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[2].PostWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[3] = howardsMoves[6];
-            howardAttackBehaviour4.timedStacks[3].PreWaitTime = 0.25f;
-            howardAttackBehaviour4.timedStacks[3].PostWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[4] = howardsMoves[5];
-            howardAttackBehaviour4.timedStacks[4].PreWaitTime = 0.1f;
-            howardAttackBehaviour4.timedStacks[4].PostWaitTime = 0.3f;
-            //5: Disc Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[5].Weight = 50;
-            howardAttackBehaviour5.timedStacks = new HowardAttackBehaviour.TimedStack[2];
-            howardAttackBehaviour5.timedStacks[0] = howardsMoves[0];
-            howardAttackBehaviour5.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour5.timedStacks[0].PostWaitTime = 0.001f;
-            howardAttackBehaviour5.timedStacks[1] = howardsMoves[5];
-            howardAttackBehaviour5.timedStacks[1].PreWaitTime = 0.001f;
-            howardAttackBehaviour5.timedStacks[1].PostWaitTime = 0.3f;
-            //6: Pillar Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[6].RequiredMinMaxRange = new Vector2(0, 6);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[6].Weight = 50;
-            howardAttackBehaviour6.timedStacks = new HowardAttackBehaviour.TimedStack[2];
-            howardAttackBehaviour6.timedStacks[0] = howardsMoves[1];
-            howardAttackBehaviour6.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour6.timedStacks[0].PostWaitTime = 0.5f;
-            howardAttackBehaviour6.timedStacks[1] = howardsMoves[5];
-            howardAttackBehaviour6.timedStacks[1].PreWaitTime = 0.1f;
-            howardAttackBehaviour6.timedStacks[1].PostWaitTime = 0.3f;
-            //7: Pillar Pillar Straight Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[7].RequiredMinMaxRange = new Vector2(3, 6);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[7].Weight = 50;
-            howardAttackBehaviour7.timedStacks = new HowardAttackBehaviour.TimedStack[4];
-            howardAttackBehaviour7.timedStacks[0] = howardsMoves[1];
-            howardAttackBehaviour7.timedStacks[0].PreWaitTime = 0.1f;
-            howardAttackBehaviour7.timedStacks[0].PostWaitTime = 0.5f;
-            howardAttackBehaviour7.timedStacks[1] = howardsMoves[1];
-            howardAttackBehaviour7.timedStacks[1].PreWaitTime = 0.5f;
-            howardAttackBehaviour7.timedStacks[1].PostWaitTime = 0.3f;
-            howardAttackBehaviour7.timedStacks[2] = howardsMoves[5];
-            howardAttackBehaviour7.timedStacks[2].PreWaitTime = 0.5f;
-            howardAttackBehaviour7.timedStacks[2].PostWaitTime = 0.3f;
-            howardAttackBehaviour7.timedStacks[3] = howardsMoves[5];
-            howardAttackBehaviour7.timedStacks[3].PreWaitTime = 0.5f;
-            howardAttackBehaviour7.timedStacks[3].PostWaitTime = 0.3f;
-            //8: Ball Uppercut Straight
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[8].RequiredMinMaxRange = new Vector2(2, 7);
-            Howard.currentActiveHoward.LogicLevels[2].SequenceSets[8].Weight = 50;
-            howardAttackBehaviour8.timedStacks = new HowardAttackBehaviour.TimedStack[3];
-            howardAttackBehaviour8.timedStacks[0] = howardsMoves[2];
-            howardAttackBehaviour8.timedStacks[0].PreWaitTime = 0.5f;
-            howardAttackBehaviour8.timedStacks[0].PostWaitTime = 0.75f;
-            howardAttackBehaviour8.timedStacks[1] = howardsMoves[6];
-            howardAttackBehaviour8.timedStacks[1].PreWaitTime = 0.1f;
-            howardAttackBehaviour8.timedStacks[1].PostWaitTime = 0.05f;
-            howardAttackBehaviour8.timedStacks[2] = howardsMoves[5];
-            howardAttackBehaviour8.timedStacks[2].PreWaitTime = 0.05f;
-            howardAttackBehaviour8.timedStacks[2].PostWaitTime = 0.3f;
+            SetupNewMoveset();
+            CreateNewMoveset();
+            for (int i = 0; i < newSequenceSet.Length; i++)
+            {
+                Howard.currentActiveHoward.LogicLevels[2].SequenceSets[i] = newSequenceSet[i];
+            }
+            GameObject.Find("Game Instance/Initializable/PlayerManager").GetComponent<PlayerManager>().localPlayer.Controller.transform.position = new Vector3(10f, 0, -21f);
+            MelonLogger.Msg("Done");
         }
     }
 }
